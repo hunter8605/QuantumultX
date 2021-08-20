@@ -133,11 +133,15 @@ function interact_template_getHomeData(timeout = 0) {
               await interact_template_getLotteryResult(data.data.result.taskVos[i].taskId);
               continue;
             }
-            if ([0,13].includes(data.data.result.taskVos[i].taskType)) {
+            if ([0,13,12].includes(data.data.result.taskVos[i].taskType)) {
               if (data.data.result.taskVos[i].status === 1) {
                 await harmony_collectScore(data.data.result.taskVos[i].simpleRecordInfoVo.taskToken,data.data.result.taskVos[i].taskId);
               }
               continue
+            }
+            if(data.data.result.taskVos[i].status === 4)
+            {
+              await extra_getLotteryResult(data.data.result.taskVos[i].taskId);
             }
             if ([14,6].includes(data.data.result.taskVos[i].taskType)) {
               console.log(data.data.result.taskVos[i].assistTaskDetailVo.taskToken)
@@ -219,6 +223,65 @@ function harmony_collectScore(taskToken,taskId,itemId = "",actionType = 0,timeou
           console.log(data.data.bizMsg)
           if (data.data.bizMsg === "任务领取成功") {
             await harmony_collectScore(taskToken,taskId,itemId,0,parseInt(browseTime) * 1000);
+          }
+        } catch (e) {
+          $.logErr(e, resp);
+        } finally {
+          resolve()
+        }
+      })
+    },timeout)
+  })
+}
+
+
+
+function extra_getLotteryResult(taskId,timeout = 0) {
+  console.log(`开始额外抽奖`)
+  return new Promise((resolve) => {
+    setTimeout( ()=>{
+      let url = {
+        url : `${JD_API_HOST}`,
+        headers : {
+          'Origin' : `https://h5.m.jd.com`,
+          'Cookie' : cookie,
+          'Connection' : `keep-alive`,
+          'Accept' : `application/json, text/plain, */*`,
+          'Referer' : `https://h5.m.jd.com/babelDiy/Zeus/2WBcKYkn8viyxv7MoKKgfzmu7Dss/index.html?inviteId=P04z54XCjVXmYaW5m9cZ2f433tIlGBj3JnLHD0`,//?inviteId=P225KkcRx4b8lbWJU72wvZZcwCjVXmYaS5jQ P225KkcRx4b8lbWJU72wvZZcwCjVXmYaS5jQ
+          'Host' : `api.m.jd.com`,
+          'Accept-Encoding' : `gzip, deflate, br`,
+          'Accept-Language' : `zh-cn`
+        },
+        body : `functionId=healthyDay_getLotteryResult&body={"appId":"${appId}"${taskId ? ',"taskId":"'+taskId+'"' : ''}}&client=wh5&clientVersion=1.0.0`
+      }
+      //console.log(url.body)
+      //if (appId === "1EFRTxQ") url.body = `functionId=ts_getLottery&body={"appId":"${appId}"${taskId ? ',"taskId":"'+taskId+'"' : ''}}&client=wh5&clientVersion=1.0.0&appid=golden-egg`
+      $.post(url, async (err, resp, data) => {
+        try {
+          if (printDetail) console.log(data);
+          if (!timeout) console.log('\n开始抽奖')
+          data = JSON.parse(data);
+          if (data.data.bizCode === 0) {
+            if (data.data.result.userAwardsCacheDto.jBeanAwardVo) {
+              merge.jdBeans.success++;
+              console.log('京豆:' + data.data.result.userAwardsCacheDto.jBeanAwardVo.quantity)
+              merge.jdBeans.prizeCount += parseInt(data.data.result.userAwardsCacheDto.jBeanAwardVo.quantity)
+            }
+            if (data.data.result.userAwardsCacheDto.redPacketVO) {
+              merge.redPacket.show = true;
+              merge.redPacket.success++;
+              console.log('红包:' + data.data.result.userAwardsCacheDto.redPacketVO.value)
+              merge.redPacket.prizeCount += parseFloat(data.data.result.userAwardsCacheDto.redPacketVO.value)
+            }
+            if (data.data.result.raiseInfo) scorePerLottery = parseInt(data.data.result.raiseInfo.nextLevelScore);
+            if (parseInt(data.data.result.userScore) >= scorePerLottery && scorePerLottery) {
+              await interact_template_getLotteryResult(1000)
+            }
+          } else{
+            merge.jdBeans.fail++;
+            console.log(data.data.bizMsg)
+            if (data.data.bizCode === 111 ) data.data.bizMsg = "无机会"
+            merge.jdBeans.notify = `${data.data.bizMsg}`;
           }
         } catch (e) {
           $.logErr(e, resp);
