@@ -131,6 +131,7 @@ function interact_template_getHomeData(timeout = 0) {
             if (data.data.result.taskVos[i].status === 3) {
               console.log('开始抽奖')
               await interact_template_getLotteryResult(data.data.result.taskVos[i].taskId);
+              await extra_getLotteryResult(data.data.result.taskVos[i].taskId);
               continue;
             }
             if ([0,13,12].includes(data.data.result.taskVos[i].taskType)) {
