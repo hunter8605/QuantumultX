@@ -17,8 +17,8 @@ const $ = new Env('京东抽奖机');
 const STRSPLIT = "|";
 const needSum = false;            //是否需要显示汇总
 const printDetail = false;        //是否显示出参详情
-const appIdArr = ['1EFRRxA','1EFRQwA','1E1NYwqc','1EFRXxg','1EFVRxg','1E1NYw6w']
-const shareCodeArr = ['T0225KkcRx4b8lbWJU72wvZZcwCjVWmIaW5kRrbA','T0225KkcRx4b8lbWJU72wvZZcwCjVXnIaW5kRrbA','T0225KkcRx4b8lbWJU72wvZZcwCTJfnqS7zDcjeQOc','T0225KkcRx4b8lbWJU72wvZZcwCjVQmoaT5kRrbA','T0225KkcRx4b8lbWJU72wvZZcwCjRXnYaU5kRrbA','T0225KkcRx4b8lbWJU72wvZZcwCTJfn6-7zDQjeQOc']
+const appIdArr = ['1EFRRxA','1EFRQwA','1E1NYwqc','1EFRXxg','1EFVRxg','1E1NYw6w','1E1xRy6c','1E1xVyqw']
+const shareCodeArr = []
 const homeDataFunPrefixArr = ['interact_template','interact_template','harmony_template','','','','','','','','','','interact_template','interact_template']
 const collectScoreFunPrefixArr = ['','','','','','','','','','','','','interact_template','interact_template']
 const lotteryResultFunPrefixArr = ['','','','','','','','','','','','','','interact_template','interact_template']
@@ -109,7 +109,7 @@ function interact_template_getHomeData(timeout = 0) {
           'Accept-Encoding' : `gzip, deflate, br`,
           'Accept-Language' : `zh-cn`
         },
-        body : `functionId=${homeDataFunPrefix}_getHomeData&body={"appId":"${appId}","taskToken":""}&client=wh5&clientVersion=1.0.0`
+        body : `functionId=${homeDataFunPrefix}_getHomeData&body={"appId":"${appId}","taskToken":"","channelId":1}&client=wh5&clientVersion=1.0.0`
       }
 
       $.post(url, async (err, resp, data) => {
